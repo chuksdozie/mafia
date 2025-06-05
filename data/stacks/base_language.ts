@@ -1,0 +1,38 @@
+export const base_language = [
+  {
+    id: 1,
+    image: "/assets/courses/react.png",
+    title: "Python 3",
+    description: "Python 3 Tutorial for Beginners",
+    path: "Python3",
+    code: "python3",
+    playlist: "PL4cUxeGkcC9idu6GZ8EU_5B6WpKTdYZbK",
+  },
+  {
+    id: 2,
+    image: "/assets/courses/react.png",
+    title: "JavaScript",
+    description: "JavaScript Tutorials for Beginners",
+    path: "JavaScript",
+    code: "javascript",
+    playlist: "PL4cUxeGkcC9i9Ae2D9Ee1RvylH38dKuET",
+  },
+  {
+    id: 3,
+    image: "/assets/courses/react.png",
+    title: "Typescript",
+    description: "TypeScript Tutorial",
+    path: "Typescript",
+    code: "typescript",
+    playlist: "PL4cUxeGkcC9gUgr39Q_yD6v-bSyMwKPUI",
+  },
+  {
+    id: 4,
+    image: "/assets/courses/react.png",
+    title: "Dart",
+    description: "Dart Crash Course",
+    path: "Dart",
+    code: "dart",
+    playlist: "PL4cUxeGkcC9iVGY3ppchN9kIauln8IiEh",
+  },
+];
