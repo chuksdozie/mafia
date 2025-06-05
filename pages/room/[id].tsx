@@ -262,6 +262,7 @@ export default function GameRoomPage() {
             >
               {p.name} {p.id === game.hostId && "(host)"}{" "}
               {isAlive && (game.votes?.[p.id] ? "👍" : "❌")}
+              {isEliminated && p.role?.toUpperCase()}
             </li>
           );
         })}
