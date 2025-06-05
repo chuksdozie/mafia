@@ -54,8 +54,7 @@ export default function GameRoomPage() {
     router.replace(`/room/${game.id}?playerId=${newId}`);
   };
 
-  const isAlive = (p: Player) =>
-    !game?.eliminated?.includes(p.id || "") ?? true;
+  const isAlive = (p: Player) => !game?.eliminated?.includes(p.id) ?? true;
 
   const submitVote = async () => {
     if (!selectedVote || !playerId || !game) return;
