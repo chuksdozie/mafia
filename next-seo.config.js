@@ -1,7 +1,7 @@
 // next-seo.config.js
-const title = "BuddyPaid | Effortless Group Expense Tracking";
+const title = "MafiaMaster | Lead. Deceive. Survive.";
 const description =
-  "Split bills and track group expenses instantly — no signup required. Perfect for friends, roommates, trips, and events. Built for transparency and ease.";
+  "Dive into the ultimate social deduction experience. Form alliances, expose the Mafia, or manipulate your way to power. Play online with friends — thrilling, strategic, and always unpredictable.";
 
 export default {
   title,
@@ -9,18 +9,18 @@ export default {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://buddy.devchuks.com", // Replace with your actual BuddyPaid custom domain
+    url: "https://mafiagame.devchuks.com",
     title,
     description,
     images: [
       {
-        url: "https://ik.imagekit.io/akf2tcskl/DCC/DCC%20Banner%20AI_civhHDMi6.webp", // Upload a proper OG banner
+        url: "https://ik.imagekit.io/akf2tcskl/DCC/Screenshot%202025-06-05%20at%2013.31.49_dix-NBZbd7.png", // Upload a proper OG banner
         width: 1200,
         height: 630,
-        alt: "BuddyPaid – Split Group Bills Easily",
+        alt: "MafiaMaster | Lead. Deceive. Survive.",
       },
     ],
-    site_name: "BuddyPaid",
+    site_name: "Mafia Game",
   },
   // twitter: {
   //   handle: "@devchuks_", // Use your actual handle
