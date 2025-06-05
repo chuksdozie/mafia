@@ -185,7 +185,7 @@ export default function GameRoomPage() {
           <h2 className="text-xl font-bold text-red-600">
             A game is currently in progress 🕹️
           </h2>
-          <p className="mt-2 text-gray-700">You can't join right now.</p>
+          <p className="mt-2 text-gray-700">You can&apos;t join right now.</p>
         </div>
       );
     }
