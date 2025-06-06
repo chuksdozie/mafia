@@ -378,7 +378,7 @@ export default function Home() {
             disabled={!roomId}
             onClick={joinGame}
           >
-            Join Game
+            Join a Game Room
           </button>
         </div>
       </section>
@@ -406,23 +406,19 @@ export default function Home() {
 
       {/* Bug Fixes */}
       <section id="bug-fixes" className="py-16 px-6 bg-gray100 w-full ">
-        <h3 className="text-3xl font-semibold mb-8 text-center text-gray700">
+        <h3 className="text-3xl font-semibold mb-1 text-center text-gray700">
           Latest Bug Fixes
         </h3>
+        <p className="text-sm font-light mb-8 text-center text-gray400">
+          Mafia Game - Version 0.2.0
+        </p>
         <div className="max-w-2xl mx-auto space-y-4 text-gray600 text-sm max-h-[300px] overflow-y-scroll  bg-orange-100 rounded-lg p-6 shadow-lg">
           <ul className="list-disc list-inside space-y-2">
             <li>
               Fixed a bug where players could rejoin the game with duplicate
               roles.
             </li>
-            <li>
-              Resolved issue with the night phase timer not syncing across
-              devices.
-            </li>
             <li>Improved mobile UI responsiveness on smaller screens.</li>
-            <li>
-              Fixed audio notification inconsistencies during voting phase.
-            </li>
             <li>General performance improvements and stability fixes.</li>
           </ul>
         </div>
