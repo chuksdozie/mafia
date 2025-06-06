@@ -6,6 +6,7 @@ import { doc, onSnapshot, setDoc, updateDoc } from "firebase/firestore";
 import { v4 as uuidv4 } from "uuid";
 import { GameRoom, Player } from "@/layout/home/HomePage";
 import { db } from "@/config/firebase";
+import { AiOutlineCopy, AiOutlineShareAlt } from "react-icons/ai";
 
 export default function GameRoomPage() {
   const router = useRouter();
@@ -220,11 +221,11 @@ export default function GameRoomPage() {
     <div className="p-6 max-w-xl mx-auto">
       <button
         onClick={handleShareLink}
-        className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+        className="flex items-center gap-2 bg-gray100 text-gray500 text-sm px-4 py-2 w-fit  border border-gray500 rounded-full mb-6"
       >
-        🔗 Copy Shareable Link
+        Copy Shareable Link <AiOutlineCopy />
       </button>
-      <h1 className="text-xl font-bold mb-3">Game: {game.id}</h1>
+      {/* <h1 className="text-xl font-bold mb-3">Game: {game.id}</h1> */}
       <p>Round: {game.round ?? 0}</p>
 
       <p>Your Name: {player?.name}</p>
