@@ -6,7 +6,15 @@ import { doc, onSnapshot, setDoc, updateDoc } from "firebase/firestore";
 import { v4 as uuidv4 } from "uuid";
 import { GameRoom, Player } from "@/layout/home/HomePage";
 import { db } from "@/config/firebase";
-import { AiOutlineCopy, AiOutlineShareAlt } from "react-icons/ai";
+import {
+  AiOutlineClose,
+  AiOutlineCopy,
+  AiOutlineShareAlt,
+} from "react-icons/ai";
+import { PiGameControllerThin } from "react-icons/pi";
+import { MdOutlineVerified } from "react-icons/md";
+import CenterModal from "@/components/modal/CenterModal";
+import { toast } from "react-toastify";
 
 export default function GameRoomPage() {
   const router = useRouter();
@@ -16,6 +24,7 @@ export default function GameRoomPage() {
   const [selectedVote, setSelectedVote] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [joining, setJoining] = useState(false);
+  const [mafiaNumber, setMafiaNumber] = useState(0);
 
   useEffect(() => {
     if (!id) return;
@@ -113,7 +122,8 @@ export default function GameRoomPage() {
   const handleShareLink = () => {
     const shareableLink = `${window.location.origin}/room/${id}`;
     navigator.clipboard.writeText(shareableLink).then(() => {
-      alert("Shareable link copied to clipboard!");
+      toast.success("Shareable link copied to clipboard!");
+      // alert("Shareable link copied to clipboard!");
     });
   };
 
@@ -129,6 +139,7 @@ export default function GameRoomPage() {
     if (!game) return;
     const shuffled = [...game.players].sort(() => 0.5 - Math.random());
     const mafiaCount = Math.max(1, Math.floor(shuffled.length / 3)); // e.g. 5 => 1 mafia;
+    setMafiaNumber(mafiaCount);
     // const mafiaCount = game.mafiaCount;
     const updatedPlayers = shuffled.map((p, idx) => ({
       ...p,
@@ -147,35 +158,51 @@ export default function GameRoomPage() {
 
   const handleNewGame = async () => {
     if (!game) return;
-    const players = game.players.map((p) => ({
-      ...p,
-      role: "town",
-      id: p.id,
-    }));
+    startGame();
+    // const players = game.players.map((p) => ({
+    //   ...p,
+    //   role: "town",
+    //   id: p.id,
+    // }));
+    // const mafiaCount = Math.max(1, Math.floor(shuffled.length / 3)); // e.g. 5 => 1 mafia;
 
-    // Shuffle and assign new mafia
-    const shuffled = [...players].sort(() => Math.random() - 0.5);
-    const mafiaPlayers = shuffled.slice(0, game.mafiaCount).map((p) => ({
-      ...p,
-      role: "mafia",
-    }));
+    // // Shuffle and assign new mafia
+    // const shuffled = [...players].sort(() => Math.random() - 0.5);
+    // const mafiaPlayers = shuffled.slice(0, game.mafiaCount).map((p) => ({
+    //   ...p,
+    //   role: "mafia",
+    // }));
+    // setMafiaNumber(mafiaPlayers.length);
 
-    const updatedPlayers = players.map((p) => {
-      const isMafia = mafiaPlayers.find((m) => m.id === p.id);
-      return {
-        ...p,
-        role: isMafia ? "mafia" : "town",
-      };
-    });
+    // const updatedPlayers = players.map((p) => {
+    //   const isMafia = mafiaPlayers.find((m) => m.id === p.id);
+    //   return {
+    //     ...p,
+    //     role: isMafia ? "mafia" : "town",
+    //   };
+    // });
+
+    // await setDoc(doc(db, "games", game.id), {
+    //   ...game,
+    //   round: 1,
+    //   votes: {},
+    //   eliminated: [],
+    //   winner: null,
+    //   players: updatedPlayers,
+    //   started: true,
+    // });
+  };
+
+  const removePlayer = async (playerIdToRemove: string) => {
+    if (!game || !player || player.id !== game.hostId || game.started) return;
+
+    const updatedPlayers = game.players.filter(
+      (p) => p.id !== playerIdToRemove
+    );
 
     await setDoc(doc(db, "games", game.id), {
       ...game,
-      round: 1,
-      votes: {},
-      eliminated: [],
-      winner: null,
       players: updatedPlayers,
-      started: true,
     });
   };
 
@@ -217,42 +244,52 @@ export default function GameRoomPage() {
 
   // CASE 2: Still loading
   if (!game || (playerId && !player)) {
+    if (game && !player) {
+      return <div className="p-8">You have been removed from the game</div>;
+    }
     return <div className="p-8">Loading...</div>;
   }
 
   // CASE 3: Show main game interface
   return (
     <div className="p-6 max-w-xl mx-auto">
-      <button
-        onClick={handleShareLink}
-        className="flex items-center gap-2 bg-gray100 text-gray500 text-sm px-4 py-2 w-fit  border border-gray500 rounded-full mb-6"
-      >
-        Copy Shareable Link <AiOutlineCopy />
-      </button>
       {/* <h1 className="text-xl font-bold mb-3">Game: {game.id}</h1> */}
-      <p>Round: {game.round ?? 0}</p>
+      <div className="bg-gray300 p-4 rounded-xl">
+        <button
+          onClick={handleShareLink}
+          className="flex items-center justify-center gap-2 bg-gray100 text-gray500 text-sm px-4 py-2  border border-gray500 rounded-full mb-6 w-full"
+        >
+          Copy Shareable Link <AiOutlineCopy />
+        </button>
+        <p>Round: {game.round ?? 0}</p>
 
-      <p>Your Name: {player?.name}</p>
-      {player?.role && (
-        <p>
-          Your role: <strong>{player.role.toUpperCase()}</strong>
-        </p>
-      )}
-      {player && player.role === "mafia" && (
-        <div className="mt-2">
-          <p className="font-semibold">Other mafia members:</p>
-          <ul className="list-disc list-inside">
-            {game.players
-              .filter((p) => p.role === "mafia" && p.id !== player.id)
-              .map((p) => (
-                <li key={p.id}>{p.name}</li>
-              ))}
-          </ul>
-        </div>
-      )}
-      {player && game.eliminated?.includes(player?.id) && (
-        <p className="text-red-500">You are eliminated!</p>
-      )}
+        <p>Your Name: {player?.name}</p>
+        {player?.role && (
+          <p>
+            Your role: <strong>{player.role.toUpperCase()}</strong>
+          </p>
+        )}
+        {player && game.started && (
+          <p className="text-gray-500">{`There are ${
+            game.players.filter((p) => p.role === "mafia").length
+          } mafia members`}</p>
+        )}
+        {player && player.role === "mafia" && (
+          <div className="mt-2">
+            <p className="font-semibold">Other mafia members:</p>
+            <ul className="list-disc list-inside">
+              {game.players
+                .filter((p) => p.role === "mafia" && p.id !== player.id)
+                .map((p) => (
+                  <li key={p.id}>{p.name}</li>
+                ))}
+            </ul>
+          </div>
+        )}
+        {player && game.eliminated?.includes(player?.id) && (
+          <p className="text-red-500">You are eliminated!</p>
+        )}
+      </div>
 
       <h2 className="mt-6 font-semibold">Players</h2>
       <ul>
@@ -261,28 +298,52 @@ export default function GameRoomPage() {
           const isAlive = !isEliminated;
 
           return (
-            <li
-              key={p.id}
-              className={isEliminated ? "line-through text-gray-400" : ""}
-            >
-              {p.name} {p.id === game.hostId && "(host)"}{" "}
-              {isAlive && (game.votes?.[p.id] ? "👍" : "❌")}
-              {isEliminated && p.role?.toUpperCase()}
-            </li>
+            <div className="flex justify-between items-center bg-gray-200 my-2 p-2 rounded-lg">
+              <li
+                key={p.id}
+                className={`${
+                  isEliminated ? "line-through text-gray-400" : ""
+                } flex items-center gap-2`}
+              >
+                {p.name} {p.id === game.hostId && "(host)"}{" "}
+                {isAlive &&
+                  (game.votes?.[p.id] ? (
+                    <MdOutlineVerified size={22} color="green" />
+                  ) : (
+                    <PiGameControllerThin size={25} />
+                  ))}
+                {isEliminated && p.role?.toUpperCase()}
+              </li>
+              {playerId === game.hostId && p.id !== game.hostId && (
+                <AiOutlineClose
+                  className="cursor-pointer text-red-900"
+                  onClick={() => removePlayer(p.id)}
+                />
+              )}
+            </div>
           );
         })}
       </ul>
 
       {!game.started && player && game.hostId === player.id && !game.winner && (
         <button
-          className="mt-6 bg-purple-600 text-white px-4 py-2 rounded"
+          className={`mt-6 ${
+            game.players.length < 3 ? "bg-gray-400" : "bg-purple-600"
+          }  text-white px-4 py-2 rounded`}
+          disabled={game.players.length < 3}
           onClick={startGame}
         >
           Start Game
         </button>
       )}
+      {game.players.length < 3 && (
+        <div className="mt-2 text-xs text-gray-500">
+          Atleast 3 players are required to start the game
+        </div>
+      )}
 
       {game.winner && (
+        // <CenterModal toggleModal={() => {}}>
         <div className="mt-6 text-center">
           <h2 className="text-2xl font-bold mb-4">
             🎉 {game.winner.toUpperCase()} wins the game!
@@ -305,6 +366,7 @@ export default function GameRoomPage() {
             🔁 Start New Game
           </button>
         </div>
+        // </CenterModal>
       )}
 
       {game.started && player && isAlive(player) && !game.winner && (
