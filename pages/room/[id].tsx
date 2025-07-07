@@ -38,6 +38,7 @@ export default function GameRoomPage() {
 
   const joinRoom = async () => {
     if (!game || !name.trim()) return;
+    setJoining(true);
 
     const newId = uuidv4();
     const newPlayer: Player = {
@@ -53,6 +54,7 @@ export default function GameRoomPage() {
 
     // Redirect with playerId in URL
     router.replace(`/room/${game.id}?playerId=${newId}`);
+    setJoining(false);
   };
 
   const isAlive = (p: Player) => !(game?.eliminated?.includes(p.id) || false);
@@ -201,11 +203,13 @@ export default function GameRoomPage() {
           onChange={(e) => setName(e.target.value)}
         />
         <button
-          className="bg-blue-600 text-white px-4 py-2 rounded w-full"
+          className={`${
+            joining ? "bg-gray-400" : "bg-blue-600"
+          } text-white px-4 py-2 rounded w-full`}
           onClick={joinRoom}
-          disabled={!name.trim()}
+          disabled={!name.trim() || joining}
         >
-          Join Game
+          {joining ? "Joining..." : "Join Game"}
         </button>
       </div>
     );

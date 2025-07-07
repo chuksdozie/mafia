@@ -255,6 +255,7 @@ export interface GameRoom {
 export default function Home() {
   const [name, setName] = useState("");
   const [roomId, setRoomId] = useState("");
+  const [joining, setJoining] = useState(false);
   const router = useRouter();
 
   const createGame = async () => {
@@ -271,11 +272,13 @@ export default function Home() {
   };
 
   const joinGame = async () => {
+    setJoining(true);
     const playerId = uuidv4();
     const gameRef = doc(db, "games", roomId);
     const gameSnap = await getDoc(gameRef);
 
     if (!gameSnap.exists()) {
+      setJoining(false);
       alert("Game not found!");
       return;
     }
@@ -285,6 +288,7 @@ export default function Home() {
 
     await setDoc(gameRef, { ...data, players }, { merge: true });
     router.push(`/room/${roomId}?playerId=${playerId}`);
+    setJoining(false);
   };
 
   return (
@@ -372,13 +376,13 @@ export default function Home() {
           />
           <button
             // className="bg-green-500 text-white px-4 py-2 rounded-2xl max-w-[400px] w-full"
-            className={`${
-              !roomId ? "opacity-50 cursor-not-allowed" : ""
-            } bg-blue-500 text-white px-4 py-2 rounded-2xl max-w-[400px] w-full`}
-            disabled={!roomId}
+            className={`${!roomId ? "opacity-50 cursor-not-allowed" : ""} ${
+              joining ? "bg-gray-400" : "bg-blue-600"
+            } text-white px-4 py-2 rounded-2xl max-w-[400px] w-full`}
+            disabled={!roomId || joining}
             onClick={joinGame}
           >
-            Join a Game Room
+            {joining ? "Joining..." : "Join a Game Room"}
           </button>
         </div>
       </section>
