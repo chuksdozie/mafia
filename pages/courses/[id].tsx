@@ -76,7 +76,7 @@ const CoursePage = () => {
     };
 
     loadCourse();
-  }, [router.query.id]);
+  }, []);
 
   if (error) return <p>{error}</p>;
   if (!courseData) return <Loader />;
