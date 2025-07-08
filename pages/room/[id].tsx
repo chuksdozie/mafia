@@ -298,9 +298,11 @@ export default function GameRoomPage() {
           const isAlive = !isEliminated;
 
           return (
-            <div className="flex justify-between items-center bg-gray-200 my-2 p-2 rounded-lg">
+            <div
+              key={p.id}
+              className="flex justify-between items-center bg-gray-200 my-2 p-2 rounded-lg"
+            >
               <li
-                key={p.id}
                 className={`${
                   isEliminated ? "line-through text-gray-400" : ""
                 } flex items-center gap-2`}
