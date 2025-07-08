@@ -9,12 +9,14 @@ import { db } from "@/config/firebase";
 import {
   AiOutlineClose,
   AiOutlineCopy,
+  AiOutlineEye,
   AiOutlineShareAlt,
 } from "react-icons/ai";
 import { PiGameControllerThin } from "react-icons/pi";
 import { MdOutlineVerified } from "react-icons/md";
 import CenterModal from "@/components/modal/CenterModal";
 import { toast } from "react-toastify";
+import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
 
 export default function GameRoomPage() {
   const router = useRouter();
@@ -25,6 +27,8 @@ export default function GameRoomPage() {
   const [name, setName] = useState("");
   const [joining, setJoining] = useState(false);
   const [mafiaNumber, setMafiaNumber] = useState(0);
+  const [hideRole, setHideRole] = useState(true);
+  const [showResult, setShowResult] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -105,9 +109,11 @@ export default function GameRoomPage() {
     if (aliveMafia.length === 0) {
       winner = "town";
       game.started = false;
+      setShowResult(true);
     } else if (aliveMafia.length >= aliveTown.length) {
       winner = "mafia";
       game.started = false;
+      setShowResult(true);
     }
 
     await setDoc(doc(db, "games", game.id), {
@@ -153,6 +159,7 @@ export default function GameRoomPage() {
       votes: {},
       eliminated: [],
       players: updatedPlayers,
+      winner: null,
     });
   };
 
@@ -257,24 +264,34 @@ export default function GameRoomPage() {
       <div className="bg-gray300 p-4 rounded-xl">
         <button
           onClick={handleShareLink}
-          className="flex items-center justify-center gap-2 bg-gray100 text-gray500 text-sm px-4 py-2  border border-gray500 rounded-full mb-6 w-full"
+          className="flex items-center justify-center gap-2 bg-gray100 text-gray500 text-sm px-4 py-2  border border-gray500 rounded-full mb-4 w-full"
         >
           Copy Shareable Link <AiOutlineCopy />
         </button>
-        <p>Round: {game.round ?? 0}</p>
+        <div className="flex justify-between items-center">
+          <p className="font-bold text-2xl">{player?.name}</p>
+          {hideRole ? (
+            <FaRegEye size={20} onClick={() => setHideRole(false)} />
+          ) : (
+            <FaRegEyeSlash size={20} onClick={() => setHideRole(true)} />
+          )}
+        </div>
+        <div className="flex justify-between items-center mb-2 ">
+          {player?.role && (
+            <p>
+              Your role:{" "}
+              {hideRole ? "****" : <strong>{player.role.toUpperCase()}</strong>}
+            </p>
+          )}
+          <p>Round: {game.round ?? 0}</p>
+        </div>
 
-        <p>Your Name: {player?.name}</p>
-        {player?.role && (
-          <p>
-            Your role: <strong>{player.role.toUpperCase()}</strong>
-          </p>
-        )}
         {player && game.started && (
           <p className="text-gray-500">{`There are ${
             game.players.filter((p) => p.role === "mafia").length
           } mafia members`}</p>
         )}
-        {player && player.role === "mafia" && (
+        {player && player.role === "mafia" && !hideRole && (
           <div className="mt-2">
             <p className="font-semibold">Other mafia members:</p>
             <ul className="list-disc list-inside">
@@ -344,31 +361,41 @@ export default function GameRoomPage() {
         </div>
       )}
 
+      {game.winner && showResult && (
+        <CenterModal toggleModal={() => setShowResult(false)}>
+          <div className="mt-6 text-center">
+            <h2 className="text-2xl font-bold mb-4">
+              🎉 {game.winner.toUpperCase()} wins the game!
+            </h2>
+            <button
+              onClick={handleNewGame}
+              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 mb-2"
+            >
+              🔁 Start New Game
+            </button>
+
+            <h3 className="text-lg font-semibold mb-2">Player Roles:</h3>
+            <ul className="mb-4">
+              {game.players.map((player) => (
+                <li
+                  key={player.id}
+                  className="text-sm w-full bg-gray-100 my-2 p-2 rounded-md"
+                >
+                  {player.name} -{" "}
+                  {player.role === "mafia" ? "🕵️ Mafia" : "👮 Town"}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </CenterModal>
+      )}
       {game.winner && (
-        // <CenterModal toggleModal={() => {}}>
-        <div className="mt-6 text-center">
-          <h2 className="text-2xl font-bold mb-4">
-            🎉 {game.winner.toUpperCase()} wins the game!
-          </h2>
-
-          <h3 className="text-lg font-semibold mb-2">Player Roles:</h3>
-          <ul className="mb-4">
-            {game.players.map((player) => (
-              <li key={player.id} className="text-sm">
-                {player.name} -{" "}
-                {player.role === "mafia" ? "🕵️ Mafia" : "👮 Town"}
-              </li>
-            ))}
-          </ul>
-
-          <button
-            onClick={handleNewGame}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-          >
-            🔁 Start New Game
-          </button>
-        </div>
-        // </CenterModal>
+        <button
+          onClick={handleNewGame}
+          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+        >
+          🔁 Start New Game
+        </button>
       )}
 
       {game.started && player && isAlive(player) && !game.winner && (
