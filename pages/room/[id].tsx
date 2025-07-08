@@ -270,9 +270,10 @@ export default function GameRoomPage() {
         </button>
         <div className="flex justify-between items-center">
           <p className="font-bold text-2xl">{player?.name}</p>
-          {hideRole ? (
+          {hideRole && player?.role && (
             <FaRegEye size={20} onClick={() => setHideRole(false)} />
-          ) : (
+          )}
+          {!hideRole && player?.role && (
             <FaRegEyeSlash size={20} onClick={() => setHideRole(true)} />
           )}
         </div>
