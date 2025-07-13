@@ -29,6 +29,9 @@ export default function GameRoomPage() {
   const [mafiaNumber, setMafiaNumber] = useState(0);
   const [hideRole, setHideRole] = useState(true);
   const [showResult, setShowResult] = useState(false);
+  const [voteCountdown, setVoteCountdown] = useState<number>(30); // 30 seconds
+  const [votingActive, setVotingActive] = useState(false);
+  const [roundEvaluated, setRoundEvaluated] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -48,6 +51,35 @@ export default function GameRoomPage() {
 
     return () => unsub();
   }, [id, playerId]);
+
+  useEffect(() => {
+    if (!game || !game.started || game.winner || !player) return;
+
+    // Host only triggers countdown
+    // if (game.hostId !== player.id) return;
+
+    // Start countdown if game started and voting is in progress
+    setVotingActive(true);
+    setVoteCountdown(90); // Reset to 30 seconds
+
+    const timer = setInterval(() => {
+      setVoteCountdown((prev) => {
+        if (prev === 1) {
+          clearInterval(timer);
+          setVotingActive(false);
+          evaluateVotes(); // Auto evaluate even if not all voted
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [game?.round]);
+
+  useEffect(() => {
+    setRoundEvaluated(false);
+  }, [game?.round]);
 
   const joinRoom = async () => {
     if (!game || !name.trim()) return;
@@ -83,7 +115,8 @@ export default function GameRoomPage() {
   };
 
   const evaluateVotes = async () => {
-    if (!game) return;
+    if (!game || roundEvaluated) return;
+    setRoundEvaluated(true);
 
     const voteCounts: Record<string, number> = {};
     Object.values(game.votes).forEach((votedId) => {
@@ -307,6 +340,14 @@ export default function GameRoomPage() {
         {player && game.eliminated?.includes(player?.id) && (
           <p className="text-red-500">You are eliminated!</p>
         )}
+        {votingActive && (
+          <div className="text-center mt-2 text-sm text-gray-600">
+            ⏳ Voting ends in{" "}
+            <strong className="font-bold text-xl text-brand900">
+              {voteCountdown}s
+            </strong>
+          </div>
+        )}
       </div>
 
       <h2 className="mt-6 font-semibold">Players</h2>
@@ -350,7 +391,7 @@ export default function GameRoomPage() {
           className={`mt-6 ${
             game.players.length < 3 ? "bg-gray-400" : "bg-purple-600"
           }  text-white px-4 py-2 rounded`}
-          disabled={game.players.length < 3}
+          // disabled={game.players.length < 3}
           onClick={startGame}
         >
           Start Game
